@@ -77,7 +77,7 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
                             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                     startActivityForResult(intent, REQUEST_CODE);
                 } else {
-                    Toast.makeText(getApplicationContext(), "Plese Connect to Internet", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Please Connect to Internet", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -125,7 +125,7 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
             }
 
         } else {
-            Log.e("TTS", "Initilization Failed!");
+            Log.e("TTS", "Initialization Failed!");
         }
 
     }

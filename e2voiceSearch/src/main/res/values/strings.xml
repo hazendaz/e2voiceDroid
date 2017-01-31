@@ -7,7 +7,7 @@
     <string name="aws_region">us-east-1</string>
     <string name="screen_options_main_message">Amazon Lex</string>
     <string name="ok">OK</string>
-    <string name="permission_mp_rationale">Microphone permission is neededed.</string>
+    <string name="permission_mp_rationale">Microphone permission is needed.</string>
     <string name="lex_mic_start">What can i do for you?</string>
     <string name="lex_fulfilled">The request has been fulfilled.</string>
     <string name="lex_play_video">We got a video for you, want to play?</string>

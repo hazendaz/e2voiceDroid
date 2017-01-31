@@ -95,7 +95,7 @@ public class Lex_mix_polly extends Activity implements TextToSpeech.OnInitListen
                             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                     startActivityForResult(intent, REQUEST_CODE);
                 } else {
-                    Toast.makeText(getApplicationContext(), "Plese Connect to Internet", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Please Connect to Internet", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -147,7 +147,7 @@ public class Lex_mix_polly extends Activity implements TextToSpeech.OnInitListen
         if (status == TextToSpeech.SUCCESS) {
 
         } else {
-            Log.e("TTS", "Initilization Failed!");
+            Log.e("TTS", "Initialization Failed!");
         }
 
     }
