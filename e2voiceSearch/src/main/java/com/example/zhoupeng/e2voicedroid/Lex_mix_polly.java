@@ -58,7 +58,7 @@ public class Lex_mix_polly extends Activity implements TextToSpeech.OnInitListen
      */
     private GoogleApiClient googleClient;
 
-    ArrayList<String> matches_text;
+    List<String> matches_text;
 
     private Context appContext;
 
