@@ -1,27 +1,27 @@
 package com.example.zhoupeng.e2voicedroid.lex;
 
-        import android.content.Context;
-        import android.os.Handler;
-        import android.util.Log;
-        import android.view.View;
+import android.content.Context;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
 
-        import com.amazonaws.ClientConfiguration;
-        import com.amazonaws.auth.AWSCredentialsProvider;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.InteractionClient;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.Response;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.config.InteractionConfig;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.continuations.LexServiceContinuation;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.exceptions.InvalidParameterException;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.exceptions.MaxSpeechTimeOutException;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.exceptions.NoSpeechTimeOutException;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.listeners.AudioPlaybackListener;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.listeners.InteractionListener;
-        import com.amazonaws.mobileconnectors.lex.interactionkit.listeners.MicrophoneListener;
-        import com.amazonaws.regions.Regions;
-        import com.amazonaws.services.lexrts.model.DialogState;
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.mobileconnectors.lex.interactionkit.InteractionClient;
+import com.amazonaws.mobileconnectors.lex.interactionkit.Response;
+import com.amazonaws.mobileconnectors.lex.interactionkit.config.InteractionConfig;
+import com.amazonaws.mobileconnectors.lex.interactionkit.continuations.LexServiceContinuation;
+import com.amazonaws.mobileconnectors.lex.interactionkit.exceptions.InvalidParameterException;
+import com.amazonaws.mobileconnectors.lex.interactionkit.exceptions.MaxSpeechTimeOutException;
+import com.amazonaws.mobileconnectors.lex.interactionkit.exceptions.NoSpeechTimeOutException;
+import com.amazonaws.mobileconnectors.lex.interactionkit.listeners.AudioPlaybackListener;
+import com.amazonaws.mobileconnectors.lex.interactionkit.listeners.InteractionListener;
+import com.amazonaws.mobileconnectors.lex.interactionkit.listeners.MicrophoneListener;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.lexrts.model.DialogState;
 
-        import java.util.HashMap;
-        import java.util.Map;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class helps to easily interface the {@link E2InteractiveVoiceViewAdapter} view's
