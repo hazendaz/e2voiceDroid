@@ -144,9 +144,7 @@ public class Lex_mix_polly extends Activity implements TextToSpeech.OnInitListen
     @Override
     public void onInit(int status) {
 
-        if (status == TextToSpeech.SUCCESS) {
-
-        } else {
+        if (status != TextToSpeech.SUCCESS) {
             Log.e("TTS", "Initialization Failed!");
         }
 
