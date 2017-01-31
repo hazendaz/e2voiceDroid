@@ -62,8 +62,7 @@ public class MessagesListAdapter extends BaseAdapter {
                 convertView = layoutInflater.inflate(R.layout.message_system, null);
                 holder = new Holder();
                 holder.data = (TextView) convertView.findViewById(R.id.editTextUserDetailInput_sys);
-            }
-            else if ("tx".equals(item.getFrom())) {
+            } else if ("tx".equals(item.getFrom())) {
                 convertView = layoutInflater.inflate(R.layout.message_sent, null);
                 holder = new Holder();
                 holder.data = (TextView) convertView.findViewById(R.id.editTextUserDetailInput_tx);
