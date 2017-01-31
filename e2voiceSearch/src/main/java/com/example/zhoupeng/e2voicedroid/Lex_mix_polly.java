@@ -170,11 +170,7 @@ public class Lex_mix_polly extends Activity implements TextToSpeech.OnInitListen
     public boolean isConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo net = cm.getActiveNetworkInfo();
-        if (net != null && net.isAvailable() && net.isConnected()) {
-            return true;
-        } else {
-            return false;
-        }
+        return net != null && net.isAvailable() && net.isConnected();
     }
 
 
