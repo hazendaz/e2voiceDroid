@@ -273,7 +273,7 @@ public class Lex_polly extends Activity
     @Override
     public void onMicrophoneError(Exception e) {
         if (e instanceof NoSpeechTimeOutException) {
-//            addStatusMsg("Sorry, i can not hear you.");
+//            addStatusMsg("Sorry, I can not hear you.");
         } else if (e instanceof MaxSpeechTimeOutException) {
             addStatusMsg("Thank you, see you next time.");
             goBackToMain();
