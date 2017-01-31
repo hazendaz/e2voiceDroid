@@ -130,11 +130,7 @@ public class GoogleVoice extends Activity implements TextToSpeech.OnInitListener
     public boolean isConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo net = cm.getActiveNetworkInfo();
-        if (net != null && net.isAvailable() && net.isConnected()) {
-            return true;
-        } else {
-            return false;
-        }
+        return net != null && net.isAvailable() && net.isConnected();
     }
 
 
