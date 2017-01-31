@@ -155,14 +155,12 @@ public class Lex_mix_polly extends Activity implements TextToSpeech.OnInitListen
     @Override
     public void onDestroy() {
         // Don't forget to shutdown tts!
-
         super.onDestroy();
     }
 
 
     private void speakOut(String text) {
 //        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-
         speakByPolly(text);
     }
 
