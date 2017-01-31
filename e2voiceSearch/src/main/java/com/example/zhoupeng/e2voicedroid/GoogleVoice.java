@@ -201,7 +201,6 @@ public class GoogleVoice extends Activity implements TextToSpeech.OnInitListener
         {
             String s = "";
             HttpURLConnection urlConnection = null;
-            BufferedReader reader=null;
             try {
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -212,13 +211,14 @@ public class GoogleVoice extends Activity implements TextToSpeech.OnInitListener
                 switch (status) {
                     case 200:
                     case 201:
-                        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                         StringBuilder sb = new StringBuilder();
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            sb.append(line+"\n");
+                        try (BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
+                            String line;
+                            while ((line = br.readLine()) != null) {
+                                sb.append(line);
+                                sb.append("\n");
+                            }
                         }
-                        br.close();
                         s = sb.toString();
                         break;
                     default:
@@ -228,13 +228,6 @@ public class GoogleVoice extends Activity implements TextToSpeech.OnInitListener
                 Log.e("", e.getMessage(), e);
                 s = e.getMessage();
             } finally {
-                if(reader != null){
-                    try
-                    {
-                        reader.close();
-                    }catch(Exception ex) {}
-                }
-
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
