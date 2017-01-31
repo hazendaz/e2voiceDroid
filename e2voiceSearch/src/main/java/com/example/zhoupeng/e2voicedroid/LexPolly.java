@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
-public class Lex_polly extends Activity
+public class LexPolly extends Activity
         implements E2InteractiveVoiceView.InteractiveVoiceListener {
 
     private static final String TAG = "VoiceActivity";

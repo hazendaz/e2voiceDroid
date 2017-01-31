@@ -3,15 +3,23 @@ package com.example.zhoupeng.e2voicedroid;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.ImageButton;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -22,20 +30,27 @@ import com.amazonaws.mobileconnectors.lex.interactionkit.listeners.AudioPlayback
 import com.amazonaws.mobileconnectors.lex.interactionkit.listeners.InteractionListener;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lexrts.model.DialogState;
+import com.amazonaws.services.polly.AmazonPollyPresigningClient;
+import com.amazonaws.services.polly.model.DescribeVoicesRequest;
+import com.amazonaws.services.polly.model.DescribeVoicesResult;
+import com.amazonaws.services.polly.model.OutputFormat;
+import com.amazonaws.services.polly.model.SynthesizeSpeechPresignRequest;
+import com.amazonaws.services.polly.model.Voice;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.IOException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
+import java.util.List;
 
-public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
+public class LexMixPolly extends Activity implements TextToSpeech.OnInitListener {
 
     private static final String TAG = "TextActivity";
     private static final int REQUEST_CODE = 1234;
 
-    private TextToSpeech tts;
     ImageButton Start;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -43,7 +58,7 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
      */
     private GoogleApiClient googleClient;
 
-    ArrayList<String> matches_text;
+    List<String> matches_text;
 
     private Context appContext;
 
@@ -51,6 +66,11 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
     private boolean inConversation;
 
     private String userTextInput;
+
+
+    private AmazonPollyPresigningClient client;
+    MediaPlayer mediaPlayer;
+    private List<Voice> voices;
 
     @Override
     public void onBackPressed() {
@@ -60,13 +80,11 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lex_mix2);
+        setContentView(R.layout.activity_lex_mix_polly);
 
         appContext = getApplicationContext();
 
-        Start = (ImageButton) findViewById(R.id.start_reg_mix);
-
-        tts = new TextToSpeech(this, this);
+        Start = (ImageButton) findViewById(R.id.start_reg_mix_polly);
 
         Start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,7 +106,7 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
         initializeLexSDK();
     }
 
-    private void initializeLexSDK() {
+    protected void initializeLexSDK() {
         Log.d(TAG, "Lex Client");
         // Cognito Identity Broker is the credentials provider.
 //        CognitoCredentialsProvider credentialsProvider = new CognitoCredentialsProvider(
@@ -109,22 +127,24 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
                 appContext.getResources().getString(R.string.bot_alias));
         lexInteractionClient.setAudioPlaybackListener(audioPlaybackListener);
         lexInteractionClient.setInteractionListener(interactionListener);
+
+        // Create a client that supports generation of presigned URLs.
+        client = new AmazonPollyPresigningClient(credentialsProvider);
+
+        setupNewMediaPlayer();
     }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        setupVoicesSpinner();
+    }
+
     @Override
     public void onInit(int status) {
 
-        if (status == TextToSpeech.SUCCESS) {
-
-            int result = tts.setLanguage(Locale.US);
-
-            if (result == TextToSpeech.LANG_MISSING_DATA
-                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.e("TTS", "This Language is not supported");
-            } else {
-//                speakOut("Welcome to Chase help! This is an E2 project.");
-            }
-
-        } else {
+        if (status != TextToSpeech.SUCCESS) {
             Log.e("TTS", "Initialization Failed!");
         }
 
@@ -133,27 +153,20 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
     @Override
     public void onDestroy() {
         // Don't forget to shutdown tts!
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-        }
         super.onDestroy();
     }
 
 
     private void speakOut(String text) {
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+//        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        speakByPolly(text);
     }
 
 
     public boolean isConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo net = cm.getActiveNetworkInfo();
-        if (net != null && net.isAvailable() && net.isConnected()) {
-            return true;
-        } else {
-            return false;
-        }
+        return net != null && net.isAvailable() && net.isConnected();
     }
 
 
@@ -299,4 +312,196 @@ public class lex_mix extends Activity implements TextToSpeech.OnInitListener{
         return DateFormat.getDateTimeInstance().format(new Date());
     }
 
+
+    //polly speech
+
+    private static final String KEY_SELECTED_VOICE_POSITION = "SelectedVoicePosition";
+    private static final String KEY_VOICES = "Voices";
+    private static final String KEY_SAMPLE_TEXT = "SampleText";
+
+    private Spinner voicesSpinner;
+    private int selectedPosition;
+
+    private class SpinnerVoiceAdapter extends BaseAdapter {
+        private LayoutInflater inflater;
+        private List<Voice> voices;
+
+        SpinnerVoiceAdapter(Context ctx, List<Voice> voices) {
+            this.inflater = LayoutInflater.from(ctx);
+            this.voices = voices;
+        }
+
+        @Override
+        public int getCount() {
+            return voices.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return voices.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.voice_spinner_row, parent, false);
+            }
+            Voice voice = voices.get(position);
+
+            TextView nameTextView = (TextView) convertView.findViewById(R.id.voiceName);
+            nameTextView.setText(voice.getName());
+
+            TextView languageCodeTextView = (TextView) convertView.findViewById(R.id.voiceLanguageCode);
+            languageCodeTextView.setText(voice.getLanguageName() +
+                    " (" + voice.getLanguageCode() + ")");
+
+            return convertView;
+        }
+    }
+
+    void setupNewMediaPlayer() {
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+                setupNewMediaPlayer();
+            }
+        });
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.start();
+            }
+        });
+        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                return false;
+            }
+        });
+    }
+
+    private void speakByPolly(String textToRead) {
+
+        Voice selectedVoice = (Voice) voicesSpinner.getSelectedItem();
+
+        if (textToRead.trim().isEmpty()) {
+            textToRead = "No voice available.";
+        }
+
+        // Create speech synthesis request.
+        SynthesizeSpeechPresignRequest synthesizeSpeechPresignRequest =
+                new SynthesizeSpeechPresignRequest()
+                        // Set text to synthesize.
+                        .withText(textToRead)
+                        // Set voice selected by the user.
+                        .withVoiceId(selectedVoice.getId())
+                        // Set format to MP3.
+                        .withOutputFormat(OutputFormat.Mp3);
+
+        // Get the presigned URL for synthesized speech audio stream.
+        URL presignedSynthesizeSpeechUrl =
+                client.getPresignedSynthesizeSpeechUrl(synthesizeSpeechPresignRequest);
+
+        Log.i(TAG, "Playing speech from presigned URL: " + presignedSynthesizeSpeechUrl);
+
+        // Create a media player to play the synthesized audio stream.
+        if (mediaPlayer.isPlaying()) {
+            setupNewMediaPlayer();
+        }
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+        try {
+            // Set media player's data source to previously obtained URL.
+            mediaPlayer.setDataSource(presignedSynthesizeSpeechUrl.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to set data source for the media player! " + e.getMessage());
+        }
+
+        // Start the playback asynchronously (since the data source is a network stream).
+        mediaPlayer.prepareAsync();
+    }
+
+    void setupVoicesSpinner() {
+        voicesSpinner = (Spinner) findViewById(R.id.voicesSpinner);
+//        findViewById(R.id.voicesProgressBar).setVisibility(View.VISIBLE);
+
+        // Asynchronously get available Polly voices.
+        new GetPollyVoices().execute();
+    }
+
+    private class GetPollyVoices extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (voices != null) {
+                return null;
+            }
+
+            // Create describe voices request.
+            DescribeVoicesRequest describeVoicesRequest = new DescribeVoicesRequest();
+
+            DescribeVoicesResult describeVoicesResult;
+            try {
+                // Synchronously ask the Polly Service to describe available TTS voices.
+                describeVoicesResult = client.describeVoices(describeVoicesRequest);
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Unable to get available voices. " + e.getMessage());
+                return null;
+            }
+
+            // Get list of voices from the result.
+            List<Voice> fullVoices = describeVoicesResult.getVoices();
+            voices = new ArrayList<>();
+            for(Voice item : fullVoices)
+            {
+                if("en-US".equalsIgnoreCase(item.getLanguageCode()) )
+                {
+                    voices.add(item);
+                }
+            }
+
+            // Log a message with a list of available TTS voices.
+            Log.i(TAG, "Available Polly voices: " + voices);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (voices == null) {
+                return;
+            }
+
+            voicesSpinner.setAdapter(new SpinnerVoiceAdapter(LexMixPolly.this, voices));
+
+//            findViewById(R.id.voicesProgressBar).setVisibility(View.INVISIBLE);
+            voicesSpinner.setVisibility(View.VISIBLE);
+
+            voicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (view == null) {
+                        return;
+                    }
+
+//                    setDefaultTextForSelectedVoice();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+
+            // Restore previously selected voice (e.g. after screen orientation change).
+            voicesSpinner.setSelection(selectedPosition);
+
+//            playButton.setEnabled(true);
+        }
+    }
 }
