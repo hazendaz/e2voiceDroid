@@ -45,3 +45,13 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+.gradle
+build/
+local.properties
+
+# IDEA artifacts and output dirs
+*.iml
+*.ipr
+*.iws
+.idea
