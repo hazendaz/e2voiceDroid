@@ -29,9 +29,9 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".lex_mix" />
-        <activity android:name=".Lex_mix_polly" />
-        <activity android:name=".Lex_polly" />
+        <activity android:name=".lexMix" />
+        <activity android:name=".LexMixPolly" />
+        <activity android:name=".LexPolly" />
         <activity android:name=".GoogleVoice"></activity>
     </application>
 

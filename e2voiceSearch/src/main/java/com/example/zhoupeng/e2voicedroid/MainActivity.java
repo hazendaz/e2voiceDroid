@@ -78,7 +78,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         checkNewVersion();
 
-        Intent voiceIntent = new Intent(this, Lex_polly.class);
+        Intent voiceIntent = new Intent(this, LexPolly.class);
     }
 
     private void initTitle()
@@ -94,11 +94,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void onClick(final View v) {
         switch ((v.getId())) {
 //            case R.id.goto_reg_lex_mix:
-//                Intent textIntent = new Intent(this, lex_mix.class);
+//                Intent textIntent = new Intent(this, lexMix.class);
 //                startActivity(textIntent);
 //                break;
 //            case R.id.goto_reg_lex_mix_polly:
-//                Intent textPollyIntent = new Intent(this, Lex_mix_polly.class);
+//                Intent textPollyIntent = new Intent(this, LexMixPolly.class);
 //                startActivity(textPollyIntent);
 //                break;
 //            case R.id.goto_reg_google:
@@ -106,7 +106,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 //                startActivity(googleIntent);
 //                break;
             case R.id.goto_reg_lex_polly:
-                Intent voiceIntent = new Intent(this, Lex_polly.class);
+                Intent voiceIntent = new Intent(this, LexPolly.class);
                 startActivity(voiceIntent);
                 break;
         }
