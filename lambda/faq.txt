@@ -1,0 +1,57 @@
+'use strict';
+     
+// Close dialog with the customer, reporting fulfillmentState of Failed or Fulfilled ("Banker will be with you shortly")
+function close(sessionAttributes, fulfillmentState, message) {
+    return {
+        sessionAttributes,
+        dialogAction: {
+            type: 'Close',
+            fulfillmentState,
+            message,
+        },
+    };
+}
+ 
+// --------------- Events -----------------------
+ 
+function dispatch(intentRequest, callback) {
+    console.log('request received for userId=${intentRequest.userId}, intentName=${intentRequest.currentIntent.intentName}');
+    const sessionAttributes = intentRequest.sessionAttributes;
+    const slots = intentRequest.currentIntent.slots;
+    const faqs = slots.faqs;
+   
+    if (faqs == 'account lockout' || faqs == 'account locked' || faqs == 'my account is locked out') {
+        callback(close(sessionAttributes, 'Fulfilled',
+            { 'contentType': 'PlainText','content': `We'll lock access to the Chase Mobile app after the fifth invalid login attempt.`}));
+    } else if (faqs == 'fees') {
+        callback(close(sessionAttributes, 'Fulfilled',
+            {'contentType': 'PlainText','content': `We don't charge to download or use the Chase Mobile app.  However, you should contact your wireless service provider to see if connectivity or usage rates apply.  Fees we disclosed in your Chase Online and account agreement(s) still apply.`}));
+    } else if (faqs == 'enrollment') {
+        callback(close(sessionAttributes, 'Fulfilled',
+            {'contentType': 'PlainText','content': `For security purposes you must be enrolled in Chase Online to access account information and perform banking transaction(s) through the Chase Mobile App.  If you're not enrolled in Chase Online, simply go to Chase.com from your computer and click "Set up Online Access" on the upper left corner of the homepage.  You can also enroll from the Chase Mobile App for iPhone or Android by tapping "enroll" on the logon screen.  However, you can use the ATM/Branch locator, as well as access Chase contact information, without being enrolled in Chase Online.`}));
+    } else if (faqs == 'user id') {
+        callback(close(sessionAttributes, 'Fulfilled',
+            {'contentType': 'PlainText','content': `Yes, if you need to enroll in Chase Online, simply go to Chase.com from your computer and click "Se up Online Access' on the upper left corner of the homepage.  You can also enroll from the Chase Mobile App for iPhone or Android by tapping "enroll on the logon screen.`}));
+    } else if (faqs == 'session timeout') {
+        callback(close(sessionAttributes, 'Fulfilled',
+            {'contentType': 'PlainText','content': `Yes, your Chase Mobile app session will time out after 7 minutes of inactivity.  To avoid timing out, please ensure you're active in the session after you've logged in.`}));
+    } else {
+        callback(close(sessionAttributes, 'Fulfilled',
+            {'contentType': 'PlainText', 'content': `Good question!  I believe you would be best answered by talking with a banking specialist.  You will be greeted by a bank specialist shortly.`}));
+    }
+  }
+
+// --------------- Main handler -----------------------
+ 
+// Route the incoming request based on intent.
+// The JSON body of the request is provided in the event slot.
+exports.handler = (event, context, callback) => {
+    try {
+        dispatch(event,
+            (response) => {
+                callback(null, response);
+            });
+    } catch (err) {
+        callback(err);
+    }
+};

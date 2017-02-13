@@ -1,0 +1,106 @@
+'use strict';
+     
+// Close dialog with the customer, reporting fulfillmentState of Failed or Fulfilled ("Banker will be with you shortly")
+function close(sessionAttributes, fulfillmentState, message) {
+    return {
+        sessionAttributes,
+        dialogAction: {
+            type: 'Close',
+            fulfillmentState,
+            message,
+        },
+    };
+}
+
+function generateWelcomeMessage(){
+    var messages = ["Ask me about our CD rates today.","Ask me about our mortgage rates today.", "Ask me about our credit cards today."];
+    var num = Math.floor(Math.random() * (messages.length));
+    var welcome = "Welcome to Chase.  " + messages[num];
+    
+    return welcome;
+}
+ 
+// --------------- Events -----------------------
+ 
+function dispatch(intentRequest, callback) {
+    console.log('request received for userId=${intentRequest.userId}, intentName=${intentRequest.currentIntent.name}');
+    const sessionAttributes = intentRequest.sessionAttributes;
+    const slots = intentRequest.currentIntent.slots;
+    const intentName = intentRequest.currentIntent.name;
+    var welcome = generateWelcomeMessage();
+    var randomVideo = Math.floor(Math.random() * 5) + 1;
+
+    if (intentName == 'HelloChanse' && randomVideo == 1)
+    {
+        sessionAttributes.video = "{url:'https://www.chase.com/online/digital/media/quickdeposit.mp4', message:'Would you like to watch a video of Chase Quick Deposit?'}";
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': welcome}));
+    }
+    else if (intentName == 'HelloChanse' && randomVideo == 2)
+    {
+        sessionAttributes.video = "{url:'https://www.chase.com/online/digital/media/welcome_video_non_award_winning.mp4', message:'Would you like to watch a video of Chase?'}";
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': welcome}));
+    }
+    else if (intentName == 'HelloChanse' && randomVideo == 3)
+    {
+        sessionAttributes.video = "{url:'https://www.chase.com/online/digital/media/curry_demo.mp4', message:'Would you like to watch a video on Chase Pay with Stephen Curry?'}";
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': welcome}));
+    } 
+    else if (intentName == 'HelloChanse' && randomVideo == 4)
+    {
+        sessionAttributes.video = "{url:'https://www.chase.com/online/digital/media/demo-atm.mp4', message:'Would you like to watch a video of Chase ATM?'}";
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': welcome}));
+    }
+    else if (intentName == 'HelloChanse' && randomVideo == 5)
+    {
+        sessionAttributes.video = "{url:'https://www.chase.com/online/digital/media/demo-serena.mp4', message:'Would you like to watch a video of Chase Mobile App with Serena Williams?'}";
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': welcome}));
+    }
+    else if (intentName == 'HowToChasePay')
+    {
+        sessionAttributes.web = "{url:'https://www.chase.com/online/digital/banking.html', message:'We Found a link for you.'}";
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': welcome}));
+    }
+    else if (intentName == 'GoodbyeChase')
+    {
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': `Nice talking to you today! Goodbye!`}));
+    }
+    else if (intentName == 'speachTimeOut')
+    {
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': `Goodbye!`}));
+    }
+    else if (intentName == 'TalkToAPerson')
+    {
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': `Let me call over a person to help.  A customer service rep has been notified and will be over shortly.`}));
+    }
+    else
+    {
+        callback(close(sessionAttributes, 'Fulfilled',
+        {'contentType': 'PlainText','content': `Welcome to Chase, How can I help you today?`}));
+    }
+  }
+
+
+ 
+// --------------- Main handler -----------------------
+ 
+// Route the incoming request based on intent.
+// The JSON body of the request is provided in the event slot.
+exports.handler = (event, context, callback) => {
+    try {
+        dispatch(event,
+            (response) => {
+                callback(null, response);
+            });
+    } catch (err) {
+        callback(err);
+    }
+};
